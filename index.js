@@ -21,6 +21,7 @@ async function run(){
      await client.connect();
      const collection = client.db("services").collection("service");
      const Usercollection = client.db("users").collection("user");
+     const UserOrders = client.db("Orders").collection("order");
      // get api
      app.get('/products',async(req,res)=>{
          const query={};
@@ -34,6 +35,13 @@ async function run(){
         app.post('/products',async(req,res)=>{
           const data=req.body;
           console.log(data);
+          const result=await UserOrders.insertOne(data)
+          res.send(result);})
+
+         // admin Product
+        app.post('/product',async(req,res)=>{
+          const data=req.body;
+    
           const result=await collection.insertOne(data)
           res.send(result);})
 
@@ -57,15 +65,24 @@ async function run(){
               
         })
         // for user
-        app.put('user/:email',async(req,res)=>{
+        app.put('/user/:email',async(req,res)=>{
           const email=req.params.email;
-          const user=res.body;
+          const user=req.body;
           const filter={email:email}
           const options = { upsert: true };
            const updateDoc = {
             $set:user };
+            const result = await Usercollection.updateOne(filter, updateDoc, options);
+            res.send(result);
 
         })
+         app.get('/users',async(req,res)=>{
+          const query={};
+          const cursor= Usercollection.find(query)
+          const product=await cursor.toArray();
+          res.send(product);
+
+         })
           /// put api
           app.put('/products/reduce/:id',async(req,res)=>{
             const id=req.params.id;
@@ -80,18 +97,18 @@ async function run(){
               res.send(result);
         })
         // user ubdate
-        app.put('user/:id',async(req,res)=>{
-          const collection = client.db("adim").collection("makeAdmin");
-          const id=req.params.id;
-          const data=req.body;
-          const filter =  {_id:ObjectId(id)} ;
-          const options = { upsert: true };
-          // const updateDoc = {
-          //   $inc: { quantity:-Number(data.amout ||0) } }
-          const result = await collection.updateOne(filter, updateDoc, options);
-          res.send(result);
+        // app.put('user/:id',async(req,res)=>{
+        //   const collection = client.db("adim").collection("makeAdmin");
+        //   const id=req.params.id;
+        //   const data=req.body;
+        //   const filter =  {_id:ObjectId(id)} ;
+        //   const options = { upsert: true };
+        //   // const updateDoc = {
+        //   //   $inc: { quantity:-Number(data.amout ||0) } }
+        //   const result = await Usercollection.updateOne(filter, updateDoc, options);
+          // res.send(result);
 
-        })
+        // })
         // delete user
         app.delete('/products/:id',async(req,res)=>{
           const collection = client.db("adim").collection("makeAdmin");
@@ -103,7 +120,7 @@ async function run(){
       })
      
         // delete
-        app.delete('/products/:id',async(req,res)=>{
+        app.delete('/serviceDelete/:id',async(req,res)=>{
           const id=req.params.id;
           const filter={_id:ObjectId(id)};
           const result = await collection.deleteOne(filter);
