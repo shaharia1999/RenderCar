@@ -1,6 +1,7 @@
 const express=require('express');
 const bodyparser=require('body-parser');
 const app=express()
+var jwt = require('jsonwebtoken');
 require('dotenv').config();
 
 const cors= require('cors');
@@ -73,7 +74,9 @@ async function run(){
            const updateDoc = {
             $set:user };
             const result = await Usercollection.updateOne(filter, updateDoc, options);
-            res.send(result);
+            const token=jwt.sign({email:email},process.env.JWT_TOKEN)
+            res.send({result,token});
+            // console.log({result,token})
 
         })
          app.get('/users',async(req,res)=>{
