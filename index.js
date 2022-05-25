@@ -23,6 +23,7 @@ async function run(){
      const collection = client.db("services").collection("service");
      const Usercollection = client.db("users").collection("user");
      const UserOrders = client.db("Orders").collection("order");
+     const UserRevew= client.db("UserRevew").collection("revew");
      // get api
      app.get('/products',async(req,res)=>{
          const query={};
@@ -31,6 +32,20 @@ async function run(){
          res.send(product);
 
      });
+     app.get('/ordersItem',async(req,res)=>{
+         const query={};
+         const cursor= UserOrders.find(query)
+         const product=await cursor.toArray();
+         res.send(product);
+
+     });
+     app.delete('/OrdersItem/:id',async(req,res)=>{
+      const id=req.params.id;
+      const filter={_id:ObjectId(id)};
+      const result = await UserOrders.deleteOne(filter);
+      res.send(result);
+
+  })
 
         // post api
         app.post('/products',async(req,res)=>{
@@ -42,9 +57,14 @@ async function run(){
          // admin Product
         app.post('/product',async(req,res)=>{
           const data=req.body;
-    
           const result=await collection.insertOne(data)
-          res.send(result);})
+          res.send(result);});
+          // revew
+          app.post('/revew',async(req,res)=>{
+               const data=req.body;
+               const result= await UserRevew.insertOne(data);
+               res.send(result);
+          })
 
             //order
           app.put('/products/increase/:id',async(req,res)=>{
@@ -79,6 +99,31 @@ async function run(){
             // console.log({result,token})
 
         })
+        app.put('/admin/:email',async(req,res)=>{
+          const email=req.params.email;
+          const filter={email:email}
+           const updateDoc = {
+            $set:{role :'admin'}};
+            const result = await Usercollection.updateOne(filter, updateDoc);
+            res.send(result);
+            // console.log({result,token})
+
+        })
+        app.delete('/admin/:id',async(req,res)=>{
+          const id=req.params.id;
+          const filter={_id:ObjectId(id)};
+          const result = await Usercollection.deleteOne(filter);
+          res.send(result);
+
+      })
+        app.get('/admin/:email',async(req,res)=>{
+          const email=req.params.email;
+          const user=await Usercollection.findOne({email:email})
+          console.log(user);
+          const isAdmin= user.role ==='admin';
+          res.send(isAdmin);
+
+      })
          app.get('/users',async(req,res)=>{
           const query={};
           const cursor= Usercollection.find(query)
@@ -98,7 +143,8 @@ async function run(){
                $inc: { quantity:-Number(data.amout ||0) } }
               const result = await collection.updateOne(filter, updateDoc, options);
               res.send(result);
-        })
+        });
+
         // user ubdate
         // app.put('user/:id',async(req,res)=>{
         //   const collection = client.db("adim").collection("makeAdmin");
