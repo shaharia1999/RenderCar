@@ -1,6 +1,7 @@
 const express=require('express');
 const bodyparser=require('body-parser');
 const app=express()
+const stripe = require("stripe")(process.env.STRIPE_Key)
 var jwt = require('jsonwebtoken');
 require('dotenv').config();
 
@@ -24,6 +25,7 @@ async function run(){
      const Usercollection = client.db("users").collection("user");
      const UserOrders = client.db("Orders").collection("order");
      const UserRevew= client.db("UserRevew").collection("revew");
+     const Myprofile= client.db("Profiles").collection("profile");
      // get api
      app.get('/products',async(req,res)=>{
          const query={};
@@ -46,6 +48,13 @@ async function run(){
       res.send(result);
 
   })
+     app.get('/payment/:id',async(req,res)=>{
+      const id=req.params.id;
+      const filter={_id:ObjectId(id)};
+      const result = await UserOrders.findOne(filter);
+      res.send(result);
+
+  })
 
         // post api
         app.post('/products',async(req,res)=>{
@@ -64,6 +73,13 @@ async function run(){
                const data=req.body;
                const result= await UserRevew.insertOne(data);
                res.send(result);
+          })
+          // revew get 
+          app.get('/revew',async(req,res)=>{
+            const query={};
+            const cursor= UserRevew.find(query);
+            const result=await cursor.toArray();
+            res.send(result);
           })
 
             //order
@@ -99,6 +115,25 @@ async function run(){
             // console.log({result,token})
 
         })
+        app.put('/profile/:email',async(req,res)=>{
+          const email=req.params.email;
+          const user=req.body;
+          const filter={email:email}
+          const options = { upsert: true };
+           const updateDoc = {
+            $set:user };
+            const result = await  Myprofile.updateOne(filter, updateDoc, options);
+            res.send(result);
+            // console.log({result,token})
+
+        });
+        app.get('/profile',async(req,res)=>{
+          const query={};
+          const cursor= Myprofile.find(query);
+          const result=await cursor.toArray();
+          res.send(result);
+
+      })
         app.put('/admin/:email',async(req,res)=>{
           const email=req.params.email;
           const filter={email:email}
@@ -167,6 +202,7 @@ async function run(){
           res.send(result);
 
       })
+
      
         // delete
         app.delete('/serviceDelete/:id',async(req,res)=>{
@@ -176,6 +212,46 @@ async function run(){
           res.send(result);
 
       })
+     // payment 
+    //  app.post('/create-payment-intent',  async(req, res) =>{
+    //   const service = req.body;
+    //   const price = service.price;
+    //   const amount = price*100;
+    //   const paymentIntent = await stripe.paymentIntents.create({
+    //     amount : amount,
+    //     currency: 'usd',
+    //     payment_method_types:['card']
+    //   });
+    //   res.send({clientSecret: paymentIntent.client_secret})
+    // });
+    app.post('/create-payment-intent', async (req, res) => {
+      const service = req.body;
+      const price = service.productPrice;
+      const amount = price * 100;
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: amount,
+        currency: 'usd',
+        payment_method_types: ['card']
+      });
+      res.send({ clientSecret: paymentIntent.client_secret })
+    });
+   
+//  patch
+    app.patch('/order/:id',  async (req, res) => {
+      const id = req.params.id;
+      const payment = req.body;
+      const filter = { _id: ObjectId(id) }
+      const updateDoc = {
+        $set: {
+          paid: true,
+          transactionId: payment.transactionId
+        }
+      }
+      const updatedOrder = await UserOrders.updateOne(filter, updateDoc);
+      const result = await paymentCollection.insertOne(payment)
+      res.send(updatedOrder)
+
+    })
     }
     finally{}
   }
