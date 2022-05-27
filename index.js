@@ -236,7 +236,7 @@ async function run(){
       res.send({ clientSecret: paymentIntent.client_secret })
     });
    
-//  patch
+//  patch...
     app.patch('/order/:id',  async (req, res) => {
       const id = req.params.id;
       const payment = req.body;
