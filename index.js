@@ -1,7 +1,7 @@
 const express=require('express');
 const bodyparser=require('body-parser');
 const app=express()
-const stripe = require("stripe")(process.env.STRIPE_Key)
+const stripe = require("stripe")(process.env.SRIPE_KEY)
 var jwt = require('jsonwebtoken');
 require('dotenv').config();
 
