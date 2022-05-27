@@ -26,6 +26,7 @@ async function run(){
      const UserOrders = client.db("Orders").collection("order");
      const UserRevew= client.db("UserRevew").collection("revew");
      const Myprofile= client.db("Profiles").collection("profile");
+     const paymentCollection= client.db("payments").collection("payment");
      // get api
      app.get('/products',async(req,res)=>{
          const query={};
