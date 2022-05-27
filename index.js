@@ -57,7 +57,7 @@ async function run(){
 
   })
 
-        // post api
+        /// post api
         app.post('/products',async(req,res)=>{
           const data=req.body;
           console.log(data);
@@ -225,18 +225,18 @@ async function run(){
       });
       res.send({clientSecret: paymentIntent.client_secret})
     });
-    // app.post('/create-payment-intent', async (req, res) => {
-    //   const service = req.body;
-    //   const price = service.productPrice;
-    //   const amount = price * 100;
-    //   const paymentIntent = await stripe.paymentIntents.create({
-    //     amount: amount,
-    //     currency: 'usd',
-    //     payment_method_types: ['card']
-    //   });
-    //   res.send({ clientSecret: paymentIntent.client_secret })
-    // });
-   
+    app.post('/create-payment-intent', async (req, res) => {
+      const service = req.body;
+      const price = service.productPrice;
+      const amount = price * 100;
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: amount,
+        currency: 'usd',
+        payment_method_types: ['card']
+      });
+      res.send({ clientSecret: paymentIntent.client_secret })
+    });
+    
 //  patch...
     app.patch('/order/:id',  async (req, res) => {
       const id = req.params.id;
