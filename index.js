@@ -1,7 +1,8 @@
 const express=require('express');
 const bodyparser=require('body-parser');
 const app=express()
-const stripe = require("stripe")(process.env.SRIPE_KEY)
+// const stripe = require("stripe")(process.env.SRIPE_KEY)
+const stripe = require("stripe")('	sk_test_51L3R9oImIQQxLhtmjIp1Y9Eow9VUUthNjg7gs9mmjxdBkjWYZLOPkfcIP2y1EksXrnhQqTZY0qtrJVijIftmx39D00oe9kutMa');
 var jwt = require('jsonwebtoken');
 require('dotenv').config();
 
@@ -27,6 +28,7 @@ async function run(){
      const UserRevew= client.db("UserRevew").collection("revew");
      const Myprofile= client.db("Profiles").collection("profile");
      const paymentCollection= client.db("payments").collection("payment");
+     
      // get api
      app.get('/products',async(req,res)=>{
          const query={};
@@ -35,6 +37,23 @@ async function run(){
          res.send(product);
 
      });
+     // get all user
+     app.get('/users',async(req,res)=>{
+         const query={};
+         const cursor= Usercollection.find(query)
+         const product=await cursor.toArray();
+         res.send(product);
+
+     });
+     // delete one user
+     app.delete('/user/:id',async(req,res)=>{
+      const id=req.params.id;
+      const filter={_id:ObjectId(id)};
+      const result = await Usercollection.deleteOne(filter);
+      res.send(result);
+
+  })
+  // get all items
      app.get('/ordersItem',async(req,res)=>{
          const query={};
          const cursor= UserOrders.find(query)
@@ -42,6 +61,7 @@ async function run(){
          res.send(product);
 
      });
+     //delete one item
      app.delete('/OrdersItem/:id',async(req,res)=>{
       const id=req.params.id;
       const filter={_id:ObjectId(id)};
@@ -160,13 +180,13 @@ async function run(){
           res.send(isAdmin);
 
       })
-         app.get('/users',async(req,res)=>{
-          const query={};
-          const cursor= Usercollection.find(query)
-          const product=await cursor.toArray();
-          res.send(product);
+        //  app.get('/getuser/:id',async(req,res)=>{
+        //   const id=req.params.id;
+        //   const filter={_id:ObjectId(id)};
+        //    const result = await UserOrders.findOne(filter);
+        //   res.send(product);
 
-         })
+        //  })
           /// put api
           app.put('/products/reduce/:id',async(req,res)=>{
             const id=req.params.id;
@@ -213,21 +233,40 @@ async function run(){
           res.send(result);
 
       })
+      app.get('/admin/:email',async(req,res)=>{
+        const email=req.params.email;
+        const user=await Usercollection.findOne({email:email})
+        console.log(user);
+        const isAdmin= user.role ==='admin';
+        res.send(isAdmin);
+
+    })
      // payment 
-     app.post('/create-payment-intent',  async(req, res) =>{
-      const service = req.body;
-      const price = service.price;
-      const amount = price*100;
-      const paymentIntent = await stripe.paymentIntents.create({
-        amount : amount,
-        currency: 'usd',
-        payment_method_types:['card']
-      });
-      res.send({clientSecret: paymentIntent.client_secret})
-    });
+    //  app.post('/create-payment-intent',  async(req, res) =>{
+    //   const service = req.body;
+    //   const price = service.price;
+    //   const amount = price*100;
+    //   const paymentIntent = await stripe.paymentIntents.create({
+    //     amount : amount,
+    //     currency: 'usd',
+    //     payment_method_types:['card']
+    //   });
+    //   res.send({clientSecret: paymentIntent.client_secret})
+    // });
+    // app.post('/create-payment-intent', async (req, res) => {
+    //   const service = req.body;
+    //   const price = service.productPrice;
+    //   const amount = price * 100;
+    //   const paymentIntent = await stripe.paymentIntents.create({
+    //     amount: amount,
+    //     currency: 'usd',
+    //     payment_method_types: ['card']
+    //   });
+    //   res.send({ clientSecret: paymentIntent.client_secret })
+    // });
     app.post('/create-payment-intent', async (req, res) => {
       const service = req.body;
-      const price = service.productPrice;
+      const price = service.newprice;
       const amount = price * 100;
       const paymentIntent = await stripe.paymentIntents.create({
         amount: amount,
@@ -236,8 +275,6 @@ async function run(){
       });
       res.send({ clientSecret: paymentIntent.client_secret })
     });
-    
-//  patch...
     app.patch('/order/:id',  async (req, res) => {
       const id = req.params.id;
       const payment = req.body;
@@ -253,6 +290,22 @@ async function run(){
       res.send(updatedOrder)
 
     })
+//  patch...
+    // app.patch('/order/:id',  async (req, res) => {
+    //   const id = req.params.id;
+    //   const payment = req.body;
+    //   const filter = { _id: ObjectId(id) }
+    //   const updateDoc = {
+    //     $set: {
+    //       paid: true,
+    //       transactionId: payment.transactionId
+    //     }
+    //   }
+    //   const updatedOrder = await UserOrders.updateOne(filter, updateDoc);
+    //   const result = await paymentCollection.insertOne(payment)
+    //   res.send(updatedOrder)
+
+    // })
     }
     finally{}
   }
