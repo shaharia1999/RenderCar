@@ -172,14 +172,14 @@ async function run(){
           res.send(result);
 
       })
-        app.get('/admin/:email',async(req,res)=>{
-          const email=req.params.email;
-          const user=await Usercollection.findOne({email:email})
-          console.log(user);
-          const isAdmin= user.role ==='admin';
-          res.send(isAdmin);
+      //   app.get('/admin/:email',async(req,res)=>{
+      //     const email=req.params.email;
+      //     const user=await Usercollection.findOne({email:email})
+      //     console.log(user);
+      //     const isAdmin= user.role ==='admin';
+      //     res.send(isAdmin);
 
-      })
+      // })
         //  app.get('/getuser/:id',async(req,res)=>{
         //   const id=req.params.id;
         //   const filter={_id:ObjectId(id)};
