@@ -15,9 +15,9 @@ app.use(bodyparser.json());
 app.get('/',(req,res)=>{
     res.send("hi mr");
 })
-
+//${process.env.Db_USER} ${process.env.Db_PASS}
 const { MongoClient, ServerApiVersion,ObjectId } = require('mongodb');
-const uri = `mongodb+srv://${process.env.Db_USER}:${process.env.Db_PASS}@cluster0.9dnsi.mongodb.net/?retryWrites=true&w=majority`;
+const uri = "mongodb+srv://Car2:BMa4fWG7W4gOWS6C@cluster0.9dnsi.mongodb.net/?retryWrites=true&w=majority";
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 async function run(){
   try{
